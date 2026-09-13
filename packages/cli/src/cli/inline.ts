@@ -1,3 +1,8 @@
+import {
+  loadLLMConfig,
+  translateLocal,
+  parseLLMCount,
+} from './commands/translateLocal.js';
 import { Command } from 'commander';
 import { BaseCLI } from './base.js';
 import { SupportedLibraries, TranslateFlags, Options } from '../types/index.js';
@@ -31,6 +36,7 @@ export class InlineCLI extends BaseCLI {
   public init() {
     this.setupStageCommand();
     this.setupTranslateCommand();
+    this.setupTranslateLocalCommand();
     this.setupGenerateSourceCommand();
     this.setupValidateCommand();
     this.setupDownloadCommand();
@@ -45,6 +51,58 @@ export class InlineCLI extends BaseCLI {
   /** Returns the inline parser used by generate and targeted validation. */
   protected getInlineLibrary(): InlineLibrary {
     return fallbackToGtReact(this.library);
+  }
+
+  protected setupTranslateLocalCommand(): void {
+    attachInlineTranslateFlags(
+      this.program
+        .command('translate-local')
+        .description(
+          'Translate extracted components and dictionaries using an OpenAI-compatible endpoint into local files'
+        )
+        .option('-c, --config <path>', 'GT project configuration')
+        .option(
+          '--llm-config <path>',
+          'Server-only endpoint configuration',
+          'llm.config.json'
+        )
+        .option('--force', 'Replace existing translations', false)
+        .option(
+          '--batch-size <entries>',
+          'Maximum entries in one LLM request (overrides config)',
+          parseLLMCount
+        )
+        .option(
+          '--concurrency <requests>',
+          'Maximum simultaneous LLM requests (overrides config)',
+          parseLLMCount
+        )
+        .option(
+          '--resume',
+          'Continue an interrupted local translation run',
+          false
+        )
+        .option(
+          '--dry-run',
+          'Show missing entry counts without translating or writing files',
+          false
+        ),
+      this.getInlineSourceHelp()
+    ).action(async (options: TranslateFlags & { llmConfig: string }) => {
+      const settings = await generateSettings(options, undefined, {
+        requireConfig: true,
+      });
+      const llm = await loadLLMConfig(options.llmConfig, {
+        dryRun: options.dryRun,
+      });
+      const updates = await aggregateInlineTranslations(
+        options,
+        settings,
+        this.getInlineLibrary()
+      );
+      await translateLocal(updates, settings, llm, options);
+      logger.endCommand('Local translations complete');
+    });
   }
 
   protected setupStageCommand(): void {

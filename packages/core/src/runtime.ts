@@ -1,3 +1,4 @@
+import { type LLMConfig, validateLLMConfig } from './translate/llm/config';
 // `generaltranslation` language toolkit
 // © 2026, General Translation, Inc.
 
@@ -57,6 +58,7 @@ import { TranslateOptions } from './types-dir/api/entry';
  * @property {CustomMapping} [customMapping] - Custom mapping of locale codes to their names
  */
 export type GTConstructorParams = {
+  llm?: LLMConfig;
   apiKey?: string;
   devApiKey?: string;
   sourceLocale?: string;
@@ -83,6 +85,8 @@ export type GTConstructorParams = {
  * });
  */
 export class GTRuntime {
+  /** Configure only in server/build code; never expose provider credentials to browsers. */
+  llm?: LLMConfig;
   /** Base URL for the translation service API */
   baseUrl?: string;
 
@@ -148,6 +152,7 @@ export class GTRuntime {
   }
 
   setConfig({
+    llm,
     apiKey,
     devApiKey,
     sourceLocale,
@@ -157,6 +162,10 @@ export class GTRuntime {
     customMapping,
     baseUrl,
   }: GTConstructorParams) {
+    if (llm) {
+      validateLLMConfig(llm);
+      this.llm = llm;
+    }
     // ----- Environment properties ----- //
     if (apiKey) this.apiKey = apiKey;
     if (devApiKey) this.devApiKey = devApiKey;
@@ -219,6 +228,7 @@ export class GTRuntime {
 
   protected _getTranslationConfig(): TranslationRequestConfig {
     return {
+      ...(this.llm ? { llm: this.llm } : {}),
       baseUrl: this.baseUrl,
       apiKey: this.apiKey || this.devApiKey,
       projectId: this.projectId || '',
@@ -269,7 +279,7 @@ export class GTRuntime {
     }
 
     // Validation
-    this._validateAuth('translate');
+    if (!this.llm) this._validateAuth('translate');
 
     // Require target locale
     let targetLocale = options?.targetLocale || this.targetLocale;
@@ -347,7 +357,7 @@ export class GTRuntime {
     }
 
     // Validation
-    this._validateAuth('translateMany');
+    if (!this.llm) this._validateAuth('translateMany');
 
     // Require target locale
     let targetLocale = options?.targetLocale || this.targetLocale;

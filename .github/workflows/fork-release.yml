@@ -1,0 +1,35 @@
+name: Fork release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Immutable release tag (for example fork-v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fork-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'coldiary/special-translation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/package-mobile-fork.mjs /tmp/fork-release
+      - name: Publish archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || format('fork-{0}', github.sha) }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^fork-(v[0-9]+\.[0-9]+\.[0-9]+|[0-9a-f]{40})$ ]] || exit 1
+          gh release create "$RELEASE_TAG" /tmp/fork-release/* --target "$GITHUB_SHA" --title "$RELEASE_TAG" --notes 'Independent MIT-licensed fork with configurable OpenAI-compatible translations. See manifest.json for package hashes and source revision.'

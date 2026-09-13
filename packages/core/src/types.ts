@@ -1,3 +1,5 @@
+import type { LLMConfig } from './translate/llm/config';
+export type { LLMConfig } from './translate/llm/config';
 import type { DataFormat as FormatDataFormat } from '@generaltranslation/format/types';
 export { HTML_CONTENT_PROPS } from '@generaltranslation/format/types';
 export type {
@@ -126,6 +128,7 @@ export type Metadata = {
  * @param apiKey - The API key of the translation request.
  */
 export type TranslationRequestConfig = {
+  llm?: LLMConfig;
   projectId: string;
   baseUrl?: string;
   apiKey?: string;

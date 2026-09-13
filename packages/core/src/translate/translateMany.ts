@@ -1,3 +1,4 @@
+import { translateWithLLM } from './llm/openai';
 import {
   createApiClient,
   translate,
@@ -87,6 +88,16 @@ export async function _translateMany(
       source,
       metadata: metadata,
     };
+  }
+
+  if (config.llm) {
+    const response = await translateWithLLM(
+      requestsObject,
+      globalMetadata,
+      config.llm,
+      timeout
+    );
+    return hashOrder ? hashOrder.map((hash) => response[hash]) : response;
   }
 
   const client = createApiClient({

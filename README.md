@@ -1,3 +1,21 @@
+# Special Translation
+
+Independent MIT-licensed fork of [General Translation](https://github.com/generaltranslation/gt), maintained at [coldiary/special-translation](https://github.com/coldiary/special-translation). Uses configurable OpenAI-compatible endpoints for local translation catalogs. Not affiliated with or endorsed by General Translation, Inc.
+
+Built mobile packages are available as pinned archives in [GitHub Releases](https://github.com/coldiary/special-translation/releases). See [release installation](docs/releases.md).
+
+# Special Translation — configurable LLM fork
+
+A fork of General Translation that keeps its components and extraction approach while allowing translation through your own OpenAI-compatible endpoint.
+
+- `GT` / `GTRuntime` accept an `llm` configuration.
+- `gt translate-local` extracts components and dictionaries and writes local translation files without a GT account.
+- Existing React and Next.js components consume those files through their local loaders.
+
+Start with the [setup and usage guide](docs/openai-compatible-translations.md) and [endpoint configuration example](llm.config.example.json). Upstream cloud commands remain available separately. The original MIT license and attribution are preserved below and in `LICENSE.md`.
+
+---
+
 <div align="center">
   <a href="https://generaltranslation.com">
     <picture>

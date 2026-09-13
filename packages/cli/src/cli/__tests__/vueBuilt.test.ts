@@ -1278,6 +1278,7 @@ import { LocalT } from '@gt';
         ...commonCommands,
         'stage',
         'translate',
+        'translate-local',
         'generate',
         'validate',
         'download',

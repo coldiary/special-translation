@@ -17,7 +17,7 @@ env:
   CI: true
 jobs:
   release:
-    if: github.ref_name == 'main'
+    if: github.repository == 'generaltranslation/gt' && github.ref_name == 'main'
     name: Release
     runs-on: ubuntu-latest
     environment:
@@ -296,7 +296,7 @@ jobs:
           pnpm --filter gtx-cli run build:clean
 
   odysseus-release:
-    if: github.ref_name == 'odysseus'
+    if: github.repository == 'generaltranslation/gt' && github.ref_name == 'odysseus'
     name: Odysseus Release
     runs-on: ubuntu-latest
     environment:
